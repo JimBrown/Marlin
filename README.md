@@ -5,18 +5,33 @@ __Configured for MY Tevo Tarantula. It works for me, it may not work for you!__
 See example_configurations/Tevo Tarantula for other Tarantula configurations:
 
 - Tarantula-01
-  - Small bed, BLTouch, NO SD support, EEPROM enabled
+  - Manual bed level (no Z probe)
 - Tarantula-02
-  - Small bed, BLTouch, SD support, EEPROM enabled
-- Tarantula-03
-  - Small bed, NO bed autolevel, SD support, EEPROM enabled
-- Tarantula-04
-  - Large bed, NO bed autolevel, SD support, EEPROM enabled
+  - BLTouch
+- Tarantula-03 (contributed by Roy Gilby)
+  - BLTouch, Thermistor for Genuine E3Dv6, Software PWM Layer Fan
+- Tarantula-04 (contributed by Rob Flip)
+  - SN04 probe
 
+All example configurations have SD support and EEPROM enabled.
+
+To set the bed size (large or small) after copying the configuration files that are appropriate to your
+printer, edit the "configuration.h" and look for these line:
+```
+// The size of the print bed
+#define X_BED_SIZE 200
+#define Y_BED_SIZE 200
+```
+Change the bed size values to match your bed.
+
+If you have a Z-Probe, you must set your offsets and probe boundaries.
+  
 Do you have a configuration for the Tarantula that is not covered above? Would
 you like to share it with others by having it added to the above examples?
 If so, please contact me at jb.github (at) rcairgallery (dot) com and we'll work something
-out.
+out. (Note: Please do not contact me for support questions. I'm afraid I just do not have
+the time for answering such inquiries. Best bet is to ask in the Tevo Tarantuala
+Facebook group at https://www.facebook.com/groups/TEVO.3dprinter.owners/.)
 
 Thanks!
 
@@ -33,7 +48,7 @@ For complete Marlin documentation click over to the [Marlin Homepage <marlinfw.o
 
 ## Stable Release Branch
 
-This Release branch contains the latest tagged version of Marlin (currently 1.1.3 – June 2017).
+This Release branch contains the latest tagged version of Marlin (currently 1.1.4 – July 2017).
 
 Previous releases of Marlin include [1.0.2-2](https://github.com/MarlinFirmware/Marlin/tree/1.0.2-2) (December 2016) and [1.0.1](https://github.com/MarlinFirmware/Marlin/tree/1.0.1) (December 2014). Any version of Marlin prior to 1.0.1 (when we started tagging versions) can be collectively referred to as Marlin 1.0.0.
 

@@ -58,15 +58,15 @@
 //===========================================================================
 //============================= DELTA Printer ===============================
 //===========================================================================
-// For a Delta printer replace the configuration files with the files in the
-// example_configurations/delta directory.
+// For a Delta printer start with one of the configuration files in the
+// example_configurations/delta directory and customize for your machine.
 //
 
 //===========================================================================
 //============================= SCARA Printer ===============================
 //===========================================================================
-// For a Scara printer replace the configuration files with the files in the
-// example_configurations/SCARA directory.
+// For a SCARA printer start with the configuration files in
+// example_configurations/SCARA and customize for your machine.
 //
 
 // @section info
@@ -138,11 +138,33 @@
 // For Cyclops or any "multi-extruder" that shares a single nozzle.
 //#define SINGLENOZZLE
 
+/**
+ * Průša MK2 Single Nozzle Multi-Material Multiplexer, and variants.
+ *
+ * This device allows one stepper driver on a control board to drive
+ * two to eight stepper motors, one at a time, in a manner suitable
+ * for extruders.
+ *
+ * This option only allows the multiplexer to switch on tool-change.
+ * Additional options to configure custom E moves are pending.
+ */
+//#define MK2_MULTIPLEXER
+#if ENABLED(MK2_MULTIPLEXER)
+  // Override the default DIO selector pins here, if needed.
+  // Some pins files may provide defaults for these pins.
+  //#define E_MUX0_PIN 40  // Always Required
+  //#define E_MUX1_PIN 42  // Needed for 3 to 8 steppers
+  //#define E_MUX2_PIN 44  // Needed for 5 to 8 steppers
+#endif
+
 // A dual extruder that uses a single stepper motor
 //#define SWITCHING_EXTRUDER
 #if ENABLED(SWITCHING_EXTRUDER)
   #define SWITCHING_EXTRUDER_SERVO_NR 0
-  #define SWITCHING_EXTRUDER_SERVO_ANGLES { 0, 90 } // Angles for E0, E1
+  #define SWITCHING_EXTRUDER_SERVO_ANGLES { 0, 90 } // Angles for E0, E1[, E2, E3]
+  #if EXTRUDERS > 3
+    #define SWITCHING_EXTRUDER_E23_SERVO_NR 1
+  #endif
 #endif
 
 // A dual-nozzle that uses a servomotor to raise/lower one of the nozzles
@@ -307,7 +329,7 @@
   //#define SLOW_PWM_HEATERS // PWM with very low frequency (roughly 0.125Hz=8s) and minimum state time of approximately 1s useful for heaters driven by a relay
   //#define PID_PARAMS_PER_HOTEND // Uses separate PID parameters for each extruder (useful for mismatched extruders)
                                   // Set/get with gcode: M301 E[extruder number, 0-2]
-  #define PID_FUNCTIONAL_RANGE 20  // If the temperature difference between the target temperature and the actual temperature
+  #define PID_FUNCTIONAL_RANGE 25  // If the temperature difference between the target temperature and the actual temperature
                                   // is more than PID_FUNCTIONAL_RANGE then the PID will be shut off and the heater will be set to min/max.
   #define K1 0.95 //smoothing factor within the PID
 
@@ -585,7 +607,6 @@
  *
  */
 //#define Z_MIN_PROBE_ENDSTOP
-//#define Z_MIN_PROBE_PIN Z_MAX_PIN
 
 /**
  * Probe Type
@@ -917,7 +938,7 @@
   //=================================== Mesh ==================================
   //===========================================================================
 
-  #define MESH_INSET 10          // Mesh inset margin on print area
+  #define MESH_INSET 1           // Mesh inset margin on print area
   #define GRID_MAX_POINTS_X 3    // Don't use more than 7 points per axis, implementation limited.
   #define GRID_MAX_POINTS_Y GRID_MAX_POINTS_X
 
@@ -962,6 +983,7 @@
 // - If stepper drivers time out, it will need X and Y homing again before Z homing.
 // - Move the Z probe (or nozzle) to a defined XY point before Z Homing when homing all axes (G28).
 // - Prevent Z homing when the Z probe is outside bed area.
+//
 #define Z_SAFE_HOMING
 
 #if ENABLED(Z_SAFE_HOMING)
@@ -988,13 +1010,10 @@
 // M500 - stores parameters in EEPROM
 // M501 - reads parameters from EEPROM (if you need reset them after you changed them temporarily).
 // M502 - reverts to the default "factory settings".  You still need to store them in EEPROM afterwards if you want to.
-//define this to enable EEPROM support
-#define EEPROM_SETTINGS
-
-#if ENABLED(EEPROM_SETTINGS)
-  // To disable EEPROM Serial responses and decrease program space by ~1700 byte: comment this out:
-  #define EEPROM_CHITCHAT // Please keep turned on if you can.
-#endif
+//
+#define EEPROM_SETTINGS // Enable for M500 and M501 commands
+//#define DISABLE_M503    // Saves ~2700 bytes of PROGMEM. Disable for release!
+#define EEPROM_CHITCHAT   // Give feedback on EEPROM commands. Disable to save PROGMEM.
 
 //
 // Host Keepalive
@@ -1153,10 +1172,11 @@
  *
  * Select the language to display on the LCD. These languages are available:
  *
- *    en, an, bg, ca, cn, cz, de, el, el-gr, es, eu, fi, fr, gl, hr, it,
- *    kana, kana_utf8, nl, pl, pt, pt_utf8, pt-br, pt-br_utf8, ru, tr, uk, test
+ *    en, an, bg, ca, cn, cz, cz_utf8, de, el, el-gr, es, eu, fi, fr, gl, hr,
+ *    it, kana, kana_utf8, nl, pl, pt, pt_utf8, pt-br, pt-br_utf8, ru, tr, uk,
+ *    zh_CN, zh_TW, test
  *
- * :{ 'en':'English', 'an':'Aragonese', 'bg':'Bulgarian', 'ca':'Catalan', 'cn':'Chinese', 'cz':'Czech', 'de':'German', 'el':'Greek', 'el-gr':'Greek (Greece)', 'es':'Spanish', 'eu':'Basque-Euskera', 'fi':'Finnish', 'fr':'French', 'gl':'Galician', 'hr':'Croatian', 'it':'Italian', 'kana':'Japanese', 'kana_utf8':'Japanese (UTF8)', 'nl':'Dutch', 'pl':'Polish', 'pt':'Portuguese', 'pt-br':'Portuguese (Brazilian)', 'pt-br_utf8':'Portuguese (Brazilian UTF8)', 'pt_utf8':'Portuguese (UTF8)', 'ru':'Russian', 'tr':'Turkish', 'uk':'Ukrainian', 'test':'TEST' }
+ * :{ 'en':'English', 'an':'Aragonese', 'bg':'Bulgarian', 'ca':'Catalan', 'cn':'Chinese', 'cz':'Czech', 'cz_utf8':'Czech (UTF8)', 'de':'German', 'el':'Greek', 'el-gr':'Greek (Greece)', 'es':'Spanish', 'eu':'Basque-Euskera', 'fi':'Finnish', 'fr':'French', 'gl':'Galician', 'hr':'Croatian', 'it':'Italian', 'kana':'Japanese', 'kana_utf8':'Japanese (UTF8)', 'nl':'Dutch', 'pl':'Polish', 'pt':'Portuguese', 'pt-br':'Portuguese (Brazilian)', 'pt-br_utf8':'Portuguese (Brazilian UTF8)', 'pt_utf8':'Portuguese (UTF8)', 'ru':'Russian', 'tr':'Turkish', 'uk':'Ukrainian', 'zh_CN':'Chinese (Simplified)', 'zh_TW':'Chinese (Taiwan)', test':'TEST' }
  */
 #define LCD_LANGUAGE en
 
@@ -1182,7 +1202,7 @@
  *
  * :['JAPANESE', 'WESTERN', 'CYRILLIC']
  */
-#define DISPLAY_CHARSET_HD44780 JAPANESE
+#define DISPLAY_CHARSET_HD44780 WESTERN
 
 /**
  * LCD TYPE
@@ -1252,7 +1272,7 @@
 //
 //  Set this option if CLOCKWISE causes values to DECREASE
 //
-//#define REVERSE_ENCODER_DIRECTION
+#define REVERSE_ENCODER_DIRECTION
 
 //
 // This option reverses the encoder direction for navigating LCD menus.
@@ -1267,7 +1287,7 @@
 //
 // Add individual axis homing items (Home X, Home Y, and Home Z) to the LCD menu.
 //
-//#define INDIVIDUAL_AXIS_HOMING_MENU
+#define INDIVIDUAL_AXIS_HOMING_MENU
 
 //
 // SPEAKER/BUZZER
@@ -1275,7 +1295,7 @@
 // If you have a speaker that can produce tones, enable it here.
 // By default Marlin assumes you have a buzzer with a fixed frequency.
 //
-//#define SPEAKER
+#define SPEAKER
 
 //
 // The duration and frequency for the UI feedback sound.
@@ -1284,8 +1304,8 @@
 // Note: Test audio output with the G-Code:
 //  M300 S<frequency Hz> P<duration ms>
 //
-//#define LCD_FEEDBACK_FREQUENCY_DURATION_MS 100
-//#define LCD_FEEDBACK_FREQUENCY_HZ 1000
+#define LCD_FEEDBACK_FREQUENCY_DURATION_MS 10
+#define LCD_FEEDBACK_FREQUENCY_HZ 500
 
 //
 // CONTROLLER TYPE: Standard
@@ -1393,6 +1413,21 @@
 //#define BQ_LCD_SMART_CONTROLLER
 
 //
+// ANET_10 Controller supported displays.
+//
+//#define ANET_KEYPAD_LCD         // Requires ADC_KEYPAD_PIN to be assigned to an analog pin.
+                                  // This LCD is known to be susceptible to electrical interference
+                                  // which scrambles the display.  Pressing any button clears it up.
+//#define ANET_FULL_GRAPHICS_LCD  // Anet 128x64 full graphics lcd with rotary encoder as used on Anet A6
+                                  // A clone of the RepRapDiscount full graphics display but with
+                                  // different pins/wiring (see pins_ANET_10.h).
+
+//
+// LCD for Melzi Card with Graphical LCD
+//
+//#define LCD_FOR_MELZI
+
+//
 // CONTROLLER TYPE: I2C
 //
 // Note: These controllers require the installation of Arduino's LiquidCrystal_I2C
@@ -1407,6 +1442,9 @@
 
 //
 // Sainsmart YW Robot (LCM1602) LCD Display
+//
+// Note: This controller requires F.Malpartida's LiquidCrystal_I2C library
+// https://bitbucket.org/fmalpartida/new-liquidcrystal/wiki/Home
 //
 //#define LCD_I2C_SAINSMART_YWROBOT
 
@@ -1498,11 +1536,14 @@
 // SkeinForge sends the wrong arc g-codes when using Arc Point as fillet procedure
 //#define SF_ARC_FIX
 
-// Support for the BariCUDA Paste Extruder.
+// Support for the BariCUDA Paste Extruder
 //#define BARICUDA
 
-//define BlinkM/CyzRgb Support
+// Support for BlinkM/CyzRgb
 //#define BLINKM
+
+// Support for PCA9632 PWM LED driver
+//#define PCA9632
 
 /**
  * RGB LED / LED Strip Control
@@ -1541,7 +1582,7 @@
  *  - Change to green once print has finished
  *  - Turn off after the print has finished and the user has pushed a button
  */
-#if ENABLED(BLINKM) || ENABLED(RGB_LED) || ENABLED(RGBW_LED)
+#if ENABLED(BLINKM) || ENABLED(RGB_LED) || ENABLED(RGBW_LED) || ENABLED(PCA9632)
   #define PRINTER_EVENT_LEDS
 #endif
 
@@ -1589,7 +1630,7 @@
  */
 //#define FILAMENT_WIDTH_SENSOR
 
-#define DEFAULT_NOMINAL_FILAMENT_DIA 3.00   // (mm) Diameter of the filament generally used (3.0 or 1.75mm), also used in the slicer. Used to validate sensor reading.
+#define DEFAULT_NOMINAL_FILAMENT_DIA 1.75   // (mm) Diameter of the filament generally used (3.0 or 1.75mm), also used in the slicer. Used to validate sensor reading.
 
 #if ENABLED(FILAMENT_WIDTH_SENSOR)
   #define FILAMENT_SENSOR_EXTRUDER_NUM 0    // Index of the extruder that has the filament sensor (0,1,2,3)
