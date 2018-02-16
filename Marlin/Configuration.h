@@ -31,13 +31,13 @@
 /**
  * Equipment options
  */
-//#define LARGE_BED
+#define LARGE_BED
 #define SDSUPPORT
 //#define CHANGE_Y_DIRECTION      // If your bed homes in the wrong direction (it should move front to back) enable this.
 //#define CHANGE_X_DIRECTION      // If your X carriage homes in the wrong direction (it should move right to left) enable this.
 //#define CHANGE_Z_DIRECTION      // If your Z homes in the wrong direction (it should move top to bottom) enable this.
 //#define HOTEND_E3DV6            // Genuine E3D v6 hotend.
-//#define FULL_GRAPHIC_SMART      // Enable this if you have a RepRap Discount Full Graphic Smart Controller (The
+#define FULL_GRAPHIC_SMART      // Enable this if you have a RepRap Discount Full Graphic Smart Controller (The
                                   // stock controller is a RepRap Discount Smart Controller)
 //#define Z_DUAL_STEPPER_DRIVERS  // Enable this if you have dual Z stepper motors with the second stepper motor
                                   // connected to the next available E plug (usually E1)
@@ -117,7 +117,7 @@
 /**
  * Enable this to turn on support for two extruders
  */
-//#define DUAL_EXTRUDER // If not single nozzle, primary nozzle plugged in to E0 port
+// #define DUAL_EXTRUDER // If not single nozzle, primary nozzle plugged in to E0 port
                         // and secondary plugged in to E1 port.
 //#define SINGLENOZZLE  // Enable this if you are using a single mixing nozzle (requires DUAL_EXTRUDER)
 
@@ -141,9 +141,13 @@
 /**
  * TEVO Tarantula Custom PID Settings - Stock Hotend
  */
-#define  hot_Kp 9.84
-#define  hot_Ki 0.50
-#define  hot_Kd 48.17
+ 14:32:15.747 : Kp: 15.84
+14:32:15.747 : Ki: 1.37
+14:32:15.747 : Kd: 45.84
+
+#define  hot_Kp 15.84
+#define  hot_Ki 1.37
+#define  hot_Kd 45.84
 // FIND YOUR OWN: "M303 E0 C8 S200" to run autotune on the hotend at 200 degreesC for 8 cycles.
 // More info here: http://reprap.org/wiki/PID_Tuning
 
@@ -169,7 +173,7 @@
  *       PLA and ABS will appear under both Custom Command and Prepare.
  */
 #define Hot_PLA 		200
-#define Bed_PLA 		 65
+#define Bed_PLA 		 60
 
 #define Hot_ABS 		240
 #define Bed_ABS 		100
