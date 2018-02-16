@@ -141,10 +141,6 @@
 /**
  * TEVO Tarantula Custom PID Settings - Stock Hotend
  */
- 14:32:15.747 : Kp: 15.84
-14:32:15.747 : Ki: 1.37
-14:32:15.747 : Kd: 45.84
-
 #define  hot_Kp 15.84
 #define  hot_Ki 1.37
 #define  hot_Kd 45.84
