@@ -44,6 +44,7 @@
 #define MSG_AUTO_HOME_X                     _UxGT("Home-aj X")
 #define MSG_AUTO_HOME_Y                     _UxGT("Home-aj Y")
 #define MSG_AUTO_HOME_Z                     _UxGT("Home-aj Z")
+#define MSG_TMC_Z_CALIBRATION               _UxGT("Kalibriraj Z")
 #define MSG_LEVEL_BED_HOMING                _UxGT("Home-aj XYZ")
 #define MSG_LEVEL_BED_WAITING               _UxGT("Klikni za početak")
 #define MSG_LEVEL_BED_NEXT_POINT            _UxGT("Sljedeća točka")
@@ -148,7 +149,6 @@
 #define MSG_NO_CARD                         _UxGT("Nema SD kartice")
 #define MSG_DWELL                           _UxGT("Sleep...")
 #define MSG_USERWAIT                        _UxGT("Čekaj korisnika...")
-#define MSG_RESUMING                        _UxGT("Nastavljam print")
 #define MSG_PRINT_ABORTED                   _UxGT("Print otkazan")
 #define MSG_NO_MOVE                         _UxGT("No move.")
 #define MSG_KILLED                          _UxGT("KILLED. ")
@@ -181,16 +181,14 @@
 #define MSG_ERR_MINTEMP                     _UxGT("Err: MINTEMP")
 #define MSG_ERR_MAXTEMP_BED                 _UxGT("Err: MAXTEMP BED")
 #define MSG_ERR_MINTEMP_BED                 _UxGT("Err: MINTEMP BED")
-#define MSG_ERR_Z_HOMING                    _UxGT("G28 Z Forbidden")
+#define MSG_ERR_Z_HOMING                    MSG_HOME _UxGT(" ") MSG_X MSG_Y _UxGT(" ") MSG_FIRST
 #define MSG_HALTED                          _UxGT("PRINTER HALTED")
 #define MSG_PLEASE_RESET                    _UxGT("Please reset")
 #define MSG_SHORT_DAY                       _UxGT("d") // One character only
 #define MSG_SHORT_HOUR                      _UxGT("h") // One character only
 #define MSG_SHORT_MINUTE                    _UxGT("m") // One character only
 #define MSG_HEATING                         _UxGT("Grijanje...")
-#define MSG_HEATING_COMPLETE                _UxGT("Grijanje gotovo.")
-#define MSG_BED_HEATING                     _UxGT("Grijanje Bed-a.")
-#define MSG_BED_DONE                        _UxGT("Bed gotov.")
+#define MSG_BED_HEATING                     _UxGT("Grijanje Bed-a...")
 #define MSG_DELTA_CALIBRATE                 _UxGT("Delta Kalibracija")
 #define MSG_DELTA_CALIBRATE_X               _UxGT("Kalibriraj X")
 #define MSG_DELTA_CALIBRATE_Y               _UxGT("Kalibriraj Y")

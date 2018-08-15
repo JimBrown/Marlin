@@ -39,6 +39,7 @@
 #define MSG_AUTO_HOME_X                     _UxGT("Zeruj X")
 #define MSG_AUTO_HOME_Y                     _UxGT("Zeruj Y")
 #define MSG_AUTO_HOME_Z                     _UxGT("Zeruj Z")
+#define MSG_TMC_Z_CALIBRATION               _UxGT("Kalibruj Z")
 #define MSG_LEVEL_BED                       _UxGT("Poziom. stołu")
 #define MSG_LEVEL_BED_HOMING                _UxGT("Pozycja zerowa")
 #define MSG_LEVEL_BED_WAITING               _UxGT("Kliknij by rozp.")
@@ -145,7 +146,6 @@
 #define MSG_NO_CARD                         _UxGT("Brak karty")
 #define MSG_DWELL                           _UxGT("Uśpij...")
 #define MSG_USERWAIT                        _UxGT("Oczekiwanie...")
-#define MSG_RESUMING                        _UxGT("Wznawianie druku")
 #define MSG_PRINT_ABORTED                   _UxGT("Druk przerwany")
 #define MSG_NO_MOVE                         _UxGT("Brak ruchu")
 #define MSG_KILLED                          _UxGT("Ubity. ")
@@ -178,16 +178,14 @@
 #define MSG_ERR_MINTEMP                     _UxGT("Err min temp")
 #define MSG_ERR_MAXTEMP_BED                 _UxGT("Err max temp stołu")
 #define MSG_ERR_MINTEMP_BED                 _UxGT("Err min temp stołu")
-#define MSG_ERR_Z_HOMING                    _UxGT("G28 Z Forbidden")
+#define MSG_ERR_Z_HOMING                    MSG_HOME _UxGT(" ") MSG_X MSG_Y _UxGT(" ") MSG_FIRST
 #define MSG_HALTED                          _UxGT("Drukarka zatrzym.")
 #define MSG_PLEASE_RESET                    _UxGT("Proszę zresetować")
 #define MSG_SHORT_DAY                       _UxGT("d") // One character only
 #define MSG_SHORT_HOUR                      _UxGT("g") // One character only
 #define MSG_SHORT_MINUTE                    _UxGT("m") // One character only
 #define MSG_HEATING                         _UxGT("Rozgrzewanie...")
-#define MSG_HEATING_COMPLETE                _UxGT("Rozgrzano")
 #define MSG_BED_HEATING                     _UxGT("Rozgrzewanie stołu...")
-#define MSG_BED_DONE                        _UxGT("Rozgrzano stół")
 #define MSG_DELTA_CALIBRATE                 _UxGT("Kalibrowanie Delty")
 #define MSG_DELTA_CALIBRATE_X               _UxGT("Kalibruj X")
 #define MSG_DELTA_CALIBRATE_Y               _UxGT("Kalibruj Y")

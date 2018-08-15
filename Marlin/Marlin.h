@@ -29,14 +29,13 @@
 #include <inttypes.h>
 
 #include <util/delay.h>
-#include <avr/pgmspace.h>
 #include <avr/eeprom.h>
 #include <avr/interrupt.h>
 
 #include "MarlinConfig.h"
 
 #ifdef DEBUG_GCODE_PARSER
-  #include "gcode.h"
+  #include "parser.h"
 #endif
 
 #include "enum.h"
@@ -45,19 +44,13 @@
 #include "utility.h"
 #include "serial.h"
 
-#if ENABLED(PRINTCOUNTER)
-  #include "printcounter.h"
-#else
-  #include "stopwatch.h"
-#endif
-
 void idle(
   #if ENABLED(ADVANCED_PAUSE_FEATURE)
     bool no_stepper_sleep = false  // pass true to keep steppers from disabling on timeout
   #endif
 );
 
-void manage_inactivity(bool ignore_stepper_queue = false);
+void manage_inactivity(const bool ignore_stepper_queue=false);
 
 extern const char axis_codes[XYZE];
 
@@ -67,10 +60,10 @@ extern const char axis_codes[XYZE];
 
 #if HAS_X2_ENABLE
   #define  enable_X() do{ X_ENABLE_WRITE( X_ENABLE_ON); X2_ENABLE_WRITE( X_ENABLE_ON); }while(0)
-  #define disable_X() do{ X_ENABLE_WRITE(!X_ENABLE_ON); X2_ENABLE_WRITE(!X_ENABLE_ON); axis_known_position[X_AXIS] = false; }while(0)
+  #define disable_X() do{ X_ENABLE_WRITE(!X_ENABLE_ON); X2_ENABLE_WRITE(!X_ENABLE_ON); CBI(axis_known_position, X_AXIS); }while(0)
 #elif HAS_X_ENABLE
   #define  enable_X() X_ENABLE_WRITE( X_ENABLE_ON)
-  #define disable_X() do{ X_ENABLE_WRITE(!X_ENABLE_ON); axis_known_position[X_AXIS] = false; }while(0)
+  #define disable_X() do{ X_ENABLE_WRITE(!X_ENABLE_ON); CBI(axis_known_position, X_AXIS); }while(0)
 #else
   #define  enable_X() NOOP
   #define disable_X() NOOP
@@ -78,10 +71,10 @@ extern const char axis_codes[XYZE];
 
 #if HAS_Y2_ENABLE
   #define  enable_Y() do{ Y_ENABLE_WRITE( Y_ENABLE_ON); Y2_ENABLE_WRITE(Y_ENABLE_ON); }while(0)
-  #define disable_Y() do{ Y_ENABLE_WRITE(!Y_ENABLE_ON); Y2_ENABLE_WRITE(!Y_ENABLE_ON); axis_known_position[Y_AXIS] = false; }while(0)
+  #define disable_Y() do{ Y_ENABLE_WRITE(!Y_ENABLE_ON); Y2_ENABLE_WRITE(!Y_ENABLE_ON); CBI(axis_known_position, Y_AXIS); }while(0)
 #elif HAS_Y_ENABLE
   #define  enable_Y() Y_ENABLE_WRITE( Y_ENABLE_ON)
-  #define disable_Y() do{ Y_ENABLE_WRITE(!Y_ENABLE_ON); axis_known_position[Y_AXIS] = false; }while(0)
+  #define disable_Y() do{ Y_ENABLE_WRITE(!Y_ENABLE_ON); CBI(axis_known_position, Y_AXIS); }while(0)
 #else
   #define  enable_Y() NOOP
   #define disable_Y() NOOP
@@ -89,10 +82,10 @@ extern const char axis_codes[XYZE];
 
 #if HAS_Z2_ENABLE
   #define  enable_Z() do{ Z_ENABLE_WRITE( Z_ENABLE_ON); Z2_ENABLE_WRITE(Z_ENABLE_ON); }while(0)
-  #define disable_Z() do{ Z_ENABLE_WRITE(!Z_ENABLE_ON); Z2_ENABLE_WRITE(!Z_ENABLE_ON); axis_known_position[Z_AXIS] = false; }while(0)
+  #define disable_Z() do{ Z_ENABLE_WRITE(!Z_ENABLE_ON); Z2_ENABLE_WRITE(!Z_ENABLE_ON); CBI(axis_known_position, Z_AXIS); }while(0)
 #elif HAS_Z_ENABLE
   #define  enable_Z() Z_ENABLE_WRITE( Z_ENABLE_ON)
-  #define disable_Z() do{ Z_ENABLE_WRITE(!Z_ENABLE_ON); axis_known_position[Z_AXIS] = false; }while(0)
+  #define disable_Z() do{ Z_ENABLE_WRITE(!Z_ENABLE_ON); CBI(axis_known_position, Z_AXIS); }while(0)
 #else
   #define  enable_Z() NOOP
   #define disable_Z() NOOP
@@ -171,11 +164,6 @@ extern const char axis_codes[XYZE];
               G38_endstop_hit; // flag from the interrupt handler to indicate if the endstop went active
 #endif
 
-/**
- * The axis order in all axis related arrays is X, Y, Z, E
- */
-#define _AXIS(AXIS) AXIS ##_AXIS
-
 void enable_all_steppers();
 void disable_e_stepper(const uint8_t e);
 void disable_e_steppers();
@@ -191,16 +179,12 @@ void sync_plan_position_e();
   #define SYNC_PLAN_POSITION_KINEMATIC() sync_plan_position()
 #endif
 
-void FlushSerialRequestResend();
+void flush_and_request_resend();
 void ok_to_send();
 
 void kill(const char*);
 
 void quickstop_stepper();
-
-#if ENABLED(FILAMENT_RUNOUT_SENSOR)
-  void handle_filament_runout();
-#endif
 
 extern uint8_t marlin_debug_flags;
 #define DEBUGGING(F) (marlin_debug_flags & (DEBUG_## F))
@@ -209,22 +193,26 @@ extern bool Running;
 inline bool IsRunning() { return  Running; }
 inline bool IsStopped() { return !Running; }
 
-bool enqueue_and_echo_command(const char* cmd, bool say_ok=false); // Add a single command to the end of the buffer. Return false on failure.
-void enqueue_and_echo_commands_P(const char * const cmd);          // Set one or more commands to be prioritized over the next Serial/SD command.
+bool enqueue_and_echo_command(const char* cmd);           // Add a single command to the end of the buffer. Return false on failure.
+void enqueue_and_echo_commands_P(const char * const cmd); // Set one or more commands to be prioritized over the next Serial/SD command.
 void clear_command_queue();
 
-#define HAS_LCD_QUEUE_NOW (ENABLED(ULTIPANEL) && (ENABLED(AUTO_BED_LEVELING_UBL) || ENABLED(PID_AUTOTUNE_MENU) || ENABLED(ADVANCED_PAUSE_FEATURE)))
+#if ENABLED(M100_FREE_MEMORY_WATCHER) || ENABLED(POWER_LOSS_RECOVERY)
+  extern char command_queue[BUFSIZE][MAX_CMD_SIZE];
+#endif
+
+#define HAS_LCD_QUEUE_NOW (ENABLED(MALYAN_LCD) || (ENABLED(ULTIPANEL) && (ENABLED(AUTO_BED_LEVELING_UBL) || ENABLED(PID_AUTOTUNE_MENU) || ENABLED(ADVANCED_PAUSE_FEATURE))))
 #define HAS_QUEUE_NOW (ENABLED(SDSUPPORT) || HAS_LCD_QUEUE_NOW)
 #if HAS_QUEUE_NOW
   // Return only when commands are actually enqueued
-  void enqueue_and_echo_command_now(const char* cmd, bool say_ok=false);
+  void enqueue_and_echo_command_now(const char* cmd);
   #if HAS_LCD_QUEUE_NOW
-    void enqueue_and_echo_commands_P_now(const char * const cmd);
+    void enqueue_and_echo_commands_now_P(const char * const cmd);
   #endif
 #endif
 
-extern millis_t previous_cmd_ms;
-inline void refresh_cmd_timeout() { previous_cmd_ms = millis(); }
+extern millis_t previous_move_ms;
+inline void reset_stepper_timeout() { previous_move_ms = millis(); }
 
 /**
  * Feedrate scaling and conversion
@@ -232,20 +220,31 @@ inline void refresh_cmd_timeout() { previous_cmd_ms = millis(); }
 extern float feedrate_mm_s;
 extern int16_t feedrate_percentage;
 
-#define MMS_SCALED(MM_S) ((MM_S)*feedrate_percentage*0.01)
+#define MMS_SCALED(MM_S) ((MM_S)*feedrate_percentage*0.01f)
 
-extern bool axis_relative_modes[];
-extern bool axis_known_position[XYZ];
-extern bool axis_homed[XYZ];
+extern bool axis_relative_modes[XYZE];
+
+extern uint8_t axis_homed, axis_known_position;
+
+constexpr uint8_t xyz_bits = _BV(X_AXIS) | _BV(Y_AXIS) | _BV(Z_AXIS);
+FORCE_INLINE bool all_axes_homed() { return (axis_homed & xyz_bits) == xyz_bits; }
+FORCE_INLINE bool all_axes_known() { return (axis_known_position & xyz_bits) == xyz_bits; }
+
 extern volatile bool wait_for_heatup;
 
 #if HAS_RESUME_CONTINUE
   extern volatile bool wait_for_user;
 #endif
 
+#if HAS_AUTO_REPORTING || ENABLED(HOST_KEEPALIVE_FEATURE)
+  extern bool suspend_auto_report;
+#endif
+
 extern float current_position[XYZE], destination[XYZE];
 
-// Workspace offsets
+/**
+ * Workspace offsets
+ */
 #if HAS_WORKSPACE_OFFSET
   #if HAS_HOME_OFFSET
     extern float home_offset[XYZ];
@@ -253,36 +252,26 @@ extern float current_position[XYZE], destination[XYZE];
   #if HAS_POSITION_SHIFT
     extern float position_shift[XYZ];
   #endif
-#endif
-
-#if HAS_HOME_OFFSET && HAS_POSITION_SHIFT
-  extern float workspace_offset[XYZ];
-  #define WORKSPACE_OFFSET(AXIS) workspace_offset[AXIS]
-#elif HAS_HOME_OFFSET
-  #define WORKSPACE_OFFSET(AXIS) home_offset[AXIS]
-#elif HAS_POSITION_SHIFT
-  #define WORKSPACE_OFFSET(AXIS) position_shift[AXIS]
+  #if HAS_HOME_OFFSET && HAS_POSITION_SHIFT
+    extern float workspace_offset[XYZ];
+    #define WORKSPACE_OFFSET(AXIS) workspace_offset[AXIS]
+  #elif HAS_HOME_OFFSET
+    #define WORKSPACE_OFFSET(AXIS) home_offset[AXIS]
+  #elif HAS_POSITION_SHIFT
+    #define WORKSPACE_OFFSET(AXIS) position_shift[AXIS]
+  #endif
+  #define NATIVE_TO_LOGICAL(POS, AXIS) ((POS) + WORKSPACE_OFFSET(AXIS))
+  #define LOGICAL_TO_NATIVE(POS, AXIS) ((POS) - WORKSPACE_OFFSET(AXIS))
 #else
-  #define WORKSPACE_OFFSET(AXIS) 0
+  #define NATIVE_TO_LOGICAL(POS, AXIS) (POS)
+  #define LOGICAL_TO_NATIVE(POS, AXIS) (POS)
 #endif
-
-#define NATIVE_TO_LOGICAL(POS, AXIS) ((POS) + WORKSPACE_OFFSET(AXIS))
-#define LOGICAL_TO_NATIVE(POS, AXIS) ((POS) - WORKSPACE_OFFSET(AXIS))
-
-#if HAS_POSITION_SHIFT || DISABLED(DELTA)
-  #define LOGICAL_X_POSITION(POS)   NATIVE_TO_LOGICAL(POS, X_AXIS)
-  #define LOGICAL_Y_POSITION(POS)   NATIVE_TO_LOGICAL(POS, Y_AXIS)
-  #define RAW_X_POSITION(POS)       LOGICAL_TO_NATIVE(POS, X_AXIS)
-  #define RAW_Y_POSITION(POS)       LOGICAL_TO_NATIVE(POS, Y_AXIS)
-#else
-  #define LOGICAL_X_POSITION(POS)   (POS)
-  #define LOGICAL_Y_POSITION(POS)   (POS)
-  #define RAW_X_POSITION(POS)       (POS)
-  #define RAW_Y_POSITION(POS)       (POS)
-#endif
-
-#define LOGICAL_Z_POSITION(POS)     NATIVE_TO_LOGICAL(POS, Z_AXIS)
-#define RAW_Z_POSITION(POS)         LOGICAL_TO_NATIVE(POS, Z_AXIS)
+#define LOGICAL_X_POSITION(POS) NATIVE_TO_LOGICAL(POS, X_AXIS)
+#define LOGICAL_Y_POSITION(POS) NATIVE_TO_LOGICAL(POS, Y_AXIS)
+#define LOGICAL_Z_POSITION(POS) NATIVE_TO_LOGICAL(POS, Z_AXIS)
+#define RAW_X_POSITION(POS)     LOGICAL_TO_NATIVE(POS, X_AXIS)
+#define RAW_Y_POSITION(POS)     LOGICAL_TO_NATIVE(POS, Y_AXIS)
+#define RAW_Z_POSITION(POS)     LOGICAL_TO_NATIVE(POS, Z_AXIS)
 
 // Hotend Offsets
 #if HOTENDS > 1
@@ -310,6 +299,10 @@ extern float soft_endstop_min[XYZ], soft_endstop_max[XYZ];
   bool select_coordinate_system(const int8_t _new);
 #endif
 
+void tool_change(const uint8_t tmp_extruder, const float fr_mm_s=0.0, bool no_move=false);
+
+void  home_all_axes();
+
 void report_current_position();
 
 #if IS_KINEMATIC
@@ -332,22 +325,15 @@ void report_current_position();
   void recalc_delta_settings();
   float delta_safe_distance_from_top();
 
-  #if ENABLED(DELTA_FAST_SQRT)
-    float Q_rsqrt(const float number);
-    #define _SQRT(n) (1.0f / Q_rsqrt(n))
-  #else
-    #define _SQRT(n) SQRT(n)
-  #endif
-
   // Macro to obtain the Z position of an individual tower
-  #define DELTA_Z(V,T) V[Z_AXIS] + _SQRT(   \
+  #define DELTA_Z(V,T) V[Z_AXIS] + SQRT(    \
     delta_diagonal_rod_2_tower[T] - HYPOT2( \
         delta_tower[T][X_AXIS] - V[X_AXIS], \
         delta_tower[T][Y_AXIS] - V[Y_AXIS]  \
       )                                     \
     )
 
-  #define DELTA_IK(V) do {        \
+  #define DELTA_IK(V) do {              \
     delta[A_AXIS] = DELTA_Z(V, A_AXIS); \
     delta[B_AXIS] = DELTA_Z(V, B_AXIS); \
     delta[C_AXIS] = DELTA_Z(V, C_AXIS); \
@@ -386,11 +372,6 @@ void report_current_position();
   void print_2d_array(const uint8_t sx, const uint8_t sy, const uint8_t precision, const element_2d_fn fn);
 #endif
 
-#if ENABLED(AUTO_BED_LEVELING_UBL)
-  typedef struct { double A, B, D; } linear_fit;
-  linear_fit* lsf_linear_fit(double x[], double y[], double z[], const int);
-#endif
-
 #if HAS_LEVELING
   bool leveling_is_valid();
   void set_bed_leveling_enabled(const bool enable=true);
@@ -401,19 +382,19 @@ void report_current_position();
   void set_z_fade_height(const float zfh, const bool do_report=true);
 #endif
 
-#if ENABLED(X_DUAL_ENDSTOPS)
-  extern float x_endstop_adj;
-#endif
-#if ENABLED(Y_DUAL_ENDSTOPS)
-  extern float y_endstop_adj;
-#endif
-#if ENABLED(Z_DUAL_ENDSTOPS)
-  extern float z_endstop_adj;
-#endif
-
 #if HAS_BED_PROBE
   extern float zprobe_zoffset;
   bool set_probe_deployed(const bool deploy);
+  #ifdef Z_AFTER_PROBING
+    void move_z_after_probing();
+  #endif
+  enum ProbePtRaise : unsigned char {
+    PROBE_PT_NONE,  // No raise or stow after run_z_probe
+    PROBE_PT_STOW,  // Do a complete stow after run_z_probe
+    PROBE_PT_RAISE, // Raise to "between" clearance after run_z_probe
+    PROBE_PT_BIG_RAISE  // Raise to big clearance after run_z_probe
+  };
+  float probe_pt(const float &rx, const float &ry, const ProbePtRaise raise_after=PROBE_PT_NONE, const uint8_t verbose_level=0, const bool probe_relative=true);
   #define DEPLOY_PROBE() set_probe_deployed(true)
   #define STOW_PROBE() set_probe_deployed(false)
 #else
@@ -440,7 +421,7 @@ void report_current_position();
   #endif
 #endif
 
-#if HAS_CONTROLLERFAN
+#if ENABLED(USE_CONTROLLER_FAN)
   extern int controllerFanSpeed;
 #endif
 
@@ -458,20 +439,16 @@ void report_current_position();
 #endif
 
 #if ENABLED(ADVANCED_PAUSE_FEATURE)
+  extern int8_t did_pause_print;
   extern AdvancedPauseMenuResponse advanced_pause_menu_response;
   extern float filament_change_unload_length[EXTRUDERS],
                filament_change_load_length[EXTRUDERS];
 #endif
 
-#if ENABLED(PID_EXTRUSION_SCALING)
-  extern int lpq_len;
-#endif
-
-// Print job timer
-#if ENABLED(PRINTCOUNTER)
-  extern PrintCounter print_job_timer;
-#else
-  extern Stopwatch print_job_timer;
+#if HAS_POWER_SWITCH
+  extern bool powersupply_on;
+  #define PSU_PIN_ON()  do{ OUT_WRITE(PS_ON_PIN, PS_ON_AWAKE); powersupply_on = true; }while(0)
+  #define PSU_PIN_OFF() do{ OUT_WRITE(PS_ON_PIN, PS_ON_ASLEEP); powersupply_on = false; }while(0)
 #endif
 
 // Handling multiple extruders pins
@@ -488,10 +465,14 @@ void prepare_move_to_destination();
 /**
  * Blocking movement and shorthand functions
  */
-void do_blocking_move_to(const float &x, const float &y, const float &z, const float &fr_mm_s=0.0);
-void do_blocking_move_to_x(const float &x, const float &fr_mm_s=0.0);
-void do_blocking_move_to_z(const float &z, const float &fr_mm_s=0.0);
-void do_blocking_move_to_xy(const float &x, const float &y, const float &fr_mm_s=0.0);
+void do_blocking_move_to(const float rx, const float ry, const float rz, const float &fr_mm_s=0);
+void do_blocking_move_to_x(const float &rx, const float &fr_mm_s=0);
+void do_blocking_move_to_z(const float &rz, const float &fr_mm_s=0);
+void do_blocking_move_to_xy(const float &rx, const float &ry, const float &fr_mm_s=0);
+
+#if ENABLED(ARC_SUPPORT)
+  void plan_arc(const float(&cart)[XYZE], const float(&offset)[2], const bool clockwise);
+#endif
 
 #define HAS_AXIS_UNHOMED_ERR (                                                     \
          ENABLED(Z_PROBE_ALLEN_KEY)                                                \
@@ -518,44 +499,58 @@ void do_blocking_move_to_xy(const float &x, const float &y, const float &fr_mm_s
     extern const float L1, L2;
   #endif
 
-  inline bool position_is_reachable(const float &rx, const float &ry) {
+  // Return true if the given point is within the printable area
+  inline bool position_is_reachable(const float &rx, const float &ry, const float inset=0) {
     #if ENABLED(DELTA)
-      return HYPOT2(rx, ry) <= sq(DELTA_PRINTABLE_RADIUS);
+      return HYPOT2(rx, ry) <= sq(DELTA_PRINTABLE_RADIUS - inset);
     #elif IS_SCARA
-      #if MIDDLE_DEAD_ZONE_R > 0
-        const float R2 = HYPOT2(rx - SCARA_OFFSET_X, ry - SCARA_OFFSET_Y);
-        return R2 >= sq(float(MIDDLE_DEAD_ZONE_R)) && R2 <= sq(L1 + L2);
-      #else
-        return HYPOT2(rx - SCARA_OFFSET_X, ry - SCARA_OFFSET_Y) <= sq(L1 + L2);
-      #endif
-    #else // CARTESIAN
-      // To be migrated from MakerArm branch in future
+      const float R2 = HYPOT2(rx - SCARA_OFFSET_X, ry - SCARA_OFFSET_Y);
+      return (
+        R2 <= sq(L1 + L2) - inset
+        #if MIDDLE_DEAD_ZONE_R > 0
+          && R2 >= sq(float(MIDDLE_DEAD_ZONE_R))
+        #endif
+      );
     #endif
   }
 
-  inline bool position_is_reachable_by_probe(const float &rx, const float &ry) {
-
-    // Both the nozzle and the probe must be able to reach the point.
-    // This won't work on SCARA since the probe offset rotates with the arm.
-
-    return position_is_reachable(rx, ry)
-        && position_is_reachable(rx - (X_PROBE_OFFSET_FROM_EXTRUDER), ry - (Y_PROBE_OFFSET_FROM_EXTRUDER));
-  }
+  #if HAS_BED_PROBE
+    // Return true if the both nozzle and the probe can reach the given point.
+    // Note: This won't work on SCARA since the probe offset rotates with the arm.
+    inline bool position_is_reachable_by_probe(const float &rx, const float &ry) {
+      return position_is_reachable(rx - (X_PROBE_OFFSET_FROM_EXTRUDER), ry - (Y_PROBE_OFFSET_FROM_EXTRUDER))
+             && position_is_reachable(rx, ry, ABS(MIN_PROBE_EDGE));
+    }
+  #endif
 
 #else // CARTESIAN
 
+   // Return true if the given position is within the machine bounds.
   inline bool position_is_reachable(const float &rx, const float &ry) {
-      // Add 0.001 margin to deal with float imprecision
-      return WITHIN(rx, X_MIN_POS - 0.001, X_MAX_POS + 0.001)
-          && WITHIN(ry, Y_MIN_POS - 0.001, Y_MAX_POS + 0.001);
+    // Add 0.001 margin to deal with float imprecision
+    return WITHIN(rx, X_MIN_POS - 0.001f, X_MAX_POS + 0.001f)
+        && WITHIN(ry, Y_MIN_POS - 0.001f, Y_MAX_POS + 0.001f);
   }
 
-  inline bool position_is_reachable_by_probe(const float &rx, const float &ry) {
-      // Add 0.001 margin to deal with float imprecision
-      return WITHIN(rx, MIN_PROBE_X - 0.001, MAX_PROBE_X + 0.001)
-          && WITHIN(ry, MIN_PROBE_Y - 0.001, MAX_PROBE_Y + 0.001);
-  }
+  #if HAS_BED_PROBE
+    /**
+     * Return whether the given position is within the bed, and whether the nozzle
+     * can reach the position required to put the probe at the given position.
+     *
+     * Example: For a probe offset of -10,+10, then for the probe to reach 0,0 the
+     *          nozzle must be be able to reach +10,-10.
+     */
+    inline bool position_is_reachable_by_probe(const float &rx, const float &ry) {
+      return position_is_reachable(rx - (X_PROBE_OFFSET_FROM_EXTRUDER), ry - (Y_PROBE_OFFSET_FROM_EXTRUDER))
+          && WITHIN(rx, MIN_PROBE_X - 0.001f, MAX_PROBE_X + 0.001f)
+          && WITHIN(ry, MIN_PROBE_Y - 0.001f, MAX_PROBE_Y + 0.001f);
+    }
+  #endif
 
 #endif // CARTESIAN
+
+#if !HAS_BED_PROBE
+  FORCE_INLINE bool position_is_reachable_by_probe(const float &rx, const float &ry) { return position_is_reachable(rx, ry); }
+#endif
 
 #endif // MARLIN_H

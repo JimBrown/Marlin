@@ -45,6 +45,7 @@
 #define MSG_AUTO_HOME_X                     _UxGT("Home X")
 #define MSG_AUTO_HOME_Y                     _UxGT("Home Y")
 #define MSG_AUTO_HOME_Z                     _UxGT("Home Z")
+#define MSG_TMC_Z_CALIBRATION               _UxGT("Kalibrer Z")
 #define MSG_LEVEL_BED_HOMING                _UxGT("Homing XYZ")
 #define MSG_LEVEL_BED_WAITING               _UxGT("Klik når du er klar")
 #define MSG_LEVEL_BED_NEXT_POINT            _UxGT("Næste punkt")
@@ -150,7 +151,6 @@
 #define MSG_NO_CARD                         _UxGT("Intet SD kort")
 #define MSG_DWELL                           _UxGT("Dvale...")
 #define MSG_USERWAIT                        _UxGT("Venter på bruger...")
-#define MSG_RESUMING                        _UxGT("Forsætter printet")
 #define MSG_PRINT_ABORTED                   _UxGT("Print annulleret")
 #define MSG_NO_MOVE                         _UxGT("Ingen bevægelse.")
 #define MSG_KILLED                          _UxGT("DRÆBT. ")
@@ -183,16 +183,14 @@
 #define MSG_ERR_MINTEMP                     _UxGT("Fejl: Min temp")
 #define MSG_ERR_MAXTEMP_BED                 _UxGT("Fejl: Maks Plade temp")
 #define MSG_ERR_MINTEMP_BED                 _UxGT("Fejl: Min Plade temp")
-#define MSG_ERR_Z_HOMING                    _UxGT("G28 Z Forbudt")
+#define MSG_ERR_Z_HOMING                    MSG_HOME _UxGT(" ") MSG_X MSG_Y _UxGT(" ") MSG_FIRST
 #define MSG_HALTED                          _UxGT("PRINTER STOPPET")
 #define MSG_PLEASE_RESET                    _UxGT("Reset Venligst")
 #define MSG_SHORT_DAY                       _UxGT("d") // Kun et bogstav
 #define MSG_SHORT_HOUR                      _UxGT("h") // Kun et bogstav
 #define MSG_SHORT_MINUTE                    _UxGT("m") // Kun et bogstav
 #define MSG_HEATING                         _UxGT("Opvarmer...")
-#define MSG_HEATING_COMPLETE                _UxGT("Opvarmet")
-#define MSG_BED_HEATING                     _UxGT("Opvarmer plade")
-#define MSG_BED_DONE                        _UxGT("Plade opvarmet")
+#define MSG_BED_HEATING                     _UxGT("Opvarmer plade...")
 #define MSG_DELTA_CALIBRATE                 _UxGT("Delta Kalibrering")
 #define MSG_DELTA_CALIBRATE_X               _UxGT("Kalibrer X")
 #define MSG_DELTA_CALIBRATE_Y               _UxGT("Kalibrer Y")

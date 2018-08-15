@@ -48,6 +48,7 @@
 #define MSG_AUTO_HOME_X                     _UxGT("Origen X")
 #define MSG_AUTO_HOME_Y                     _UxGT("Origen Y")
 #define MSG_AUTO_HOME_Z                     _UxGT("Origen Z")
+#define MSG_TMC_Z_CALIBRATION               _UxGT("Calibrar Z")
 #define MSG_LEVEL_BED_HOMING                _UxGT("Origen XYZ")
 #define MSG_LEVEL_BED_WAITING               _UxGT("Iniciar (Presione)")
 #define MSG_LEVEL_BED_NEXT_POINT            _UxGT("Siguiente punto")
@@ -104,7 +105,11 @@
 #define MSG_SELECT                          _UxGT("Seleccionar")
 #define MSG_ACC                             _UxGT("Aceleracion")
 #define MSG_JERK                            _UxGT("Jerk")
-#if IS_KINEMATIC
+#if IS_SCARA
+  #define MSG_VA_JERK                       _UxGT("Va-jerk")
+  #define MSG_VB_JERK                       _UxGT("Vb-jerk")
+  #define MSG_VC_JERK                       _UxGT("Vz-jerk")
+#elif IS_DELTA
   #define MSG_VA_JERK                       _UxGT("Va-jerk")
   #define MSG_VB_JERK                       _UxGT("Vb-jerk")
   #define MSG_VC_JERK                       _UxGT("Vc-jerk")
@@ -122,7 +127,11 @@
 #define MSG_A_RETRACT                       _UxGT("Acel. retrac.")
 #define MSG_A_TRAVEL                        _UxGT("Acel. Viaje")
 #define MSG_STEPS_PER_MM                    _UxGT("Pasos/mm")
-#if IS_KINEMATIC
+#if IS_SCARA
+  #define MSG_ASTEPS                        _UxGT("A pasos/deg")
+  #define MSG_BSTEPS                        _UxGT("B pasos/deg")
+  #define MSG_CSTEPS                        _UxGT("C pasos/mm")
+#elif IS_DELTA
   #define MSG_ASTEPS                        _UxGT("A pasos/mm")
   #define MSG_BSTEPS                        _UxGT("B pasos/mm")
   #define MSG_CSTEPS                        _UxGT("C pasos/mm")
@@ -158,7 +167,6 @@
 #define MSG_NO_CARD                         _UxGT("No hay tarjeta SD")
 #define MSG_DWELL                           _UxGT("Reposo...")
 #define MSG_USERWAIT                        _UxGT("Esperando ordenes")
-#define MSG_RESUMING                        _UxGT("Resumiendo impre.")
 #define MSG_PRINT_ABORTED                   _UxGT("Impresion cancelada")
 #define MSG_NO_MOVE                         _UxGT("Sin movimiento")
 #define MSG_KILLED                          _UxGT("Parada de emergencia")
@@ -191,16 +199,14 @@
 #define MSG_ERR_MINTEMP                     _UxGT("Error: Temp Minima")
 #define MSG_ERR_MAXTEMP_BED                 _UxGT("Error: Temp Max Plat")
 #define MSG_ERR_MINTEMP_BED                 _UxGT("Error: Temp Min Plat")
-#define MSG_ERR_Z_HOMING                    _UxGT("G28 Z Prohibido")
+#define MSG_ERR_Z_HOMING                    MSG_HOME _UxGT(" ") MSG_X MSG_Y _UxGT(" ") MSG_FIRST
 #define MSG_HALTED                          _UxGT("IMPRESORA PARADA")
 #define MSG_PLEASE_RESET                    _UxGT("Por favor, reinicie")
 #define MSG_SHORT_DAY                       _UxGT("d") // One character only
 #define MSG_SHORT_HOUR                      _UxGT("h") // One character only
 #define MSG_SHORT_MINUTE                    _UxGT("m") // One character only
 #define MSG_HEATING                         _UxGT("Calentando...")
-#define MSG_HEATING_COMPLETE                _UxGT("Calentamiento listo")
 #define MSG_BED_HEATING                     _UxGT("Calentando Plat...")
-#define MSG_BED_DONE                        _UxGT("Plataforma Caliente")
 #define MSG_DELTA_CALIBRATE                 _UxGT("Calibracion Delta")
 #define MSG_DELTA_CALIBRATE_X               _UxGT("Calibrar X")
 #define MSG_DELTA_CALIBRATE_Y               _UxGT("Calibrar Y")

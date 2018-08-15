@@ -50,6 +50,7 @@
 #define MSG_AUTO_HOME_X                     "X\xbc\xde\xb8\x20\xb9\xde\xdd\xc3\xdd\xcc\xaf\xb7"                // "Xｼﾞｸ ｹﾞﾝﾃﾝﾌｯｷ" ("Home X")
 #define MSG_AUTO_HOME_Y                     "Y\xbc\xde\xb8\x20\xb9\xde\xdd\xc3\xdd\xcc\xaf\xb7"                // "Yｼﾞｸ ｹﾞﾝﾃﾝﾌｯｷ" ("Home Y")
 #define MSG_AUTO_HOME_Z                     "Z\xbc\xde\xb8\x20\xb9\xde\xdd\xc3\xdd\xcc\xaf\xb7"                // "Zｼﾞｸ ｹﾞﾝﾃﾝﾌｯｷ" ("Home Z")
+#define MSG_TMC_Z_CALIBRATION               "Z\xbc\xde\xb8\x20\xba\xb3\xbe\xb2"                                // "Zｼﾞｸ ｺｳｾｲ" ("Calibrate Z")
 #define MSG_LEVEL_BED_HOMING                "\xb9\xde\xdd\xc3\xdd\xcc\xaf\xb7\xc1\xad\xb3"                     // "ｹﾞﾝﾃﾝﾌｯｷﾁｭｳ" ("Homing XYZ")
 #define MSG_LEVEL_BED_WAITING               "\xda\xcd\xde\xd8\xdd\xb8\xde\xb6\xb2\xbc"                         // "ﾚﾍﾞﾘﾝｸﾞｶｲｼ" ("Click to Begin")
 #define MSG_LEVEL_BED_NEXT_POINT            "\xc2\xb7\xde\xc9\xbf\xb8\xc3\xb2\xc3\xdd\xcd"                     // "ﾂｷﾞﾉｿｸﾃｲﾃﾝﾍ" ("Next Point")
@@ -201,7 +202,6 @@
 #define MSG_NO_CARD                         "SD\xb6\xb0\xc4\xde\xb6\xde\xb1\xd8\xcf\xbe\xdd"                   // "SDｶｰﾄﾞｶﾞｱﾘﾏｾﾝ" ("No SD card")
 #define MSG_DWELL                           "\xb7\xad\xb3\xbc"                                                 // "ｷｭｳｼ" ("Sleep...")
 #define MSG_USERWAIT                        "\xbc\xca\xde\xd7\xb8\xb5\xcf\xc1\xb8\xc0\xde\xbb\xb2"             // "ｼﾊﾞﾗｸｵﾏﾁｸﾀﾞｻｲ" ("Wait for user...")
-#define MSG_RESUMING                        "\xcc\xdf\xd8\xdd\xc4\xbb\xb2\xb6\xb2"                             // "ﾌﾟﾘﾝﾄｻｲｶｲ" ("Resuming print")
 #define MSG_PRINT_ABORTED                   "\xcc\xdf\xd8\xdd\xc4\xb6\xde\xc1\xad\xb3\xbc\xbb\xda\xcf\xbc\xc0" // "ﾌﾟﾘﾝﾄｶﾞﾁｭｳｼｻﾚﾏｼﾀ" ("Print aborted")
 #define MSG_NO_MOVE                         "\xb3\xba\xde\xb7\xcf\xbe\xdd"                                     // "ｳｺﾞｷﾏｾﾝ" ("No move.")
 #define MSG_KILLED                          "\xcb\xbc\xde\xae\xb3\xc3\xb2\xbc"                                 // "ﾋｼﾞｮｳﾃｲｼ" ("KILLED. ")
@@ -272,9 +272,7 @@
 #define MSG_SHORT_HOUR                      "h"                                                                // One character only
 #define MSG_SHORT_MINUTE                    "m"                                                                // One character only
 #define MSG_HEATING                         "\xb6\xc8\xc2\xc1\xad\xb3"                                         // "ｶﾈﾂﾁｭｳ" ("Heating...")
-#define MSG_HEATING_COMPLETE                "\xb6\xc8\xc2\xb6\xdd\xd8\xae\xb3"                                 // "ｶﾈﾂｶﾝﾘｮｳ" ("Heating done.")
-#define MSG_BED_HEATING                     "\xcd\xde\xaf\xc4\xde\x20\xb6\xc8\xc2\xc1\xad\xb3"                 // "ﾍﾞｯﾄﾞ ｶﾈﾂﾁｭｳ" ("Bed Heating.")
-#define MSG_BED_DONE                        "\xcd\xde\xaf\xc4\xde\x20\xb6\xc8\xc2\xb6\xdd\xd8\xae\xb3"         // "ﾍﾞｯﾄﾞ ｶﾈﾂｶﾝﾘｮｳ" ("Bed done.")
+#define MSG_BED_HEATING                     "\xcd\xde\xaf\xc4\xde\x20\xb6\xc8\xc2\xc1\xad\xb3"                 // "ﾍﾞｯﾄﾞ ｶﾈﾂﾁｭｳ" ("Bed Heating...")
 #define MSG_DELTA_CALIBRATE                 "\xc3\xde\xd9\xc0\x20\xba\xb3\xbe\xb2"                             // "ﾃﾞﾙﾀ ｺｳｾｲ" ("Delta Calibration")
 #define MSG_DELTA_CALIBRATE_X               "X\xbc\xde\xb8\x20\xba\xb3\xbe\xb2"                                // "Xｼﾞｸ ｺｳｾｲ" ("Calibrate X")
 #define MSG_DELTA_CALIBRATE_Y               "Y\xbc\xde\xb8\x20\xba\xb3\xbe\xb2"                                // "Yｼﾞｸ ｺｳｾｲ" ("Calibrate Y")
